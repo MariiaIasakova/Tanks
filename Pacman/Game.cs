@@ -333,12 +333,12 @@ namespace Pacman
 
         private bool Move(MovingItem item)
         {
-            if (IsFullyInCell(item.Position) && TestStep(item))
+            if (IsFullyInCell(item.Position) && !TestStep(item))
             {
-                item.Move();
-                return true;
+                return false;
             }
-            return false;
+            item.Move();
+            return true;
         }
 
         private bool TestStep(MovingItem item)
