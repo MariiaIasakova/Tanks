@@ -11,7 +11,7 @@ namespace Pacman
         public BegginerForm()
         {
             InitializeComponent();
-            ctlGhost.SelectedIndex = 0;
+            ctlGhost.SelectedIndex = 4;
             ctlApples.SelectedIndex = 0;
             ctlSpeed.DataSource = Enum.GetValues(typeof(Speed));
             ctlSpeed.SelectedIndex = 0;

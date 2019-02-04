@@ -20,3 +20,14 @@ C:\Users\marii\OneDrive\Documents\VSProjects\Pacman\Pacman\obj\Debug\Pacman.cspr
 C:\Users\marii\OneDrive\Documents\VSProjects\Pacman\Pacman\obj\Debug\Pacman.csproj.CoreCompileInputs.cache
 C:\Users\marii\OneDrive\Documents\VSProjects\Pacman\Pacman\obj\Debug\Pacman.exe
 C:\Users\marii\OneDrive\Documents\VSProjects\Pacman\Pacman\obj\Debug\Pacman.pdb
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\bin\Debug\Pacman.exe.config
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\bin\Debug\Pacman.exe
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\bin\Debug\Pacman.pdb
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.csprojAssemblyReference.cache
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.BegginerForm.resources
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.GameForm.resources
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.Properties.Resources.resources
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.csproj.GenerateResource.cache
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.csproj.CoreCompileInputs.cache
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.exe
+C:\Users\marii\OneDrive\Desktop\repository\Tanks\Pacman\obj\Debug\Pacman.pdb

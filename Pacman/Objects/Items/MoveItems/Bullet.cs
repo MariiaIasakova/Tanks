@@ -11,6 +11,7 @@ namespace Pacman.Objects.Items.MoveItems
         public Bullet(int x, int y, int speed) : base(x, y, speed)
         {
             Picture = Properties.Resources.bullet;
+            Type = ItemType.Bullet;
         }
     }
 }

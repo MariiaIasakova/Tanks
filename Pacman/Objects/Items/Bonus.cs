@@ -8,6 +8,11 @@ namespace Pacman.Objects.Items
 {
     public class Bonus : Item
     {
+        public override bool IsDirty
+        {
+            get => base.IsDirty;
+            set => base.IsDirty = true;
+        }
         public Bonus(int x, int y) : base(x,y)
         {
             Picture = Properties.Resources.bonus_live;

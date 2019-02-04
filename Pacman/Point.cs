@@ -8,7 +8,7 @@ namespace Pacman
 {
     public class Point : IEquatable<Point>
     {
-        public const int CellSize = 20;
+        public const int CellSize = 19;
         private int x;
         private int y;
         private int absX;
@@ -69,6 +69,12 @@ namespace Pacman
             absY = y * CellSize;
         }
 
+        public Point(int x, int y, int absX, int absY) : this(x, y)
+        {
+            AbsX = absX;
+            AbsY = absY;
+        }
+
         public static Point FromAbsolute(int absX, int absY)
         {
             var p = new Point();
@@ -84,10 +90,10 @@ namespace Pacman
 
         public bool Equals(Point other)
         {
-            bool result = other.AbsX > absX - CellSize
-                     && other.AbsX < absX + CellSize
-                     && other.AbsY > AbsY - CellSize
-                     && other.AbsY < AbsY + CellSize;
+            bool result = AbsX + CellSize <= other.AbsX
+                          || AbsX > other.AbsX + CellSize
+                          || AbsY + CellSize <= other.AbsY
+                          || AbsY > other.AbsY + CellSize;
             return !result;
         }
 
@@ -99,6 +105,8 @@ namespace Pacman
             }
             return false;
         }
+#warning TODO переделать GetHashCode опираясь на Equals
+        public override int GetHashCode() => 0;
 
         public static bool operator ==(Point point1, Point point2)
         {

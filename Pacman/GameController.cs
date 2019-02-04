@@ -39,6 +39,7 @@ namespace Pacman
             timer.Stop();
         }
 
+
         private void UpdateGame(object sender, EventArgs e)
         {
             gameView.Update(game.ItemsToDisplay, game.Player);

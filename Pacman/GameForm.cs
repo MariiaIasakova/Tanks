@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Pacman.Objects;
 using Pacman.Objects.Items.MoveItems;
@@ -24,13 +25,7 @@ namespace Pacman
 
         private void GameForm_Load(object sender, System.EventArgs e)
         {
-            BegginerForm fbegin = new BegginerForm();
-            if (fbegin.ShowDialog() == DialogResult.OK)
-            {
-                config.Ghosts = fbegin.Ghosts;
-                config.Apples = fbegin.Apples;
-                config.Speed = fbegin.Speed;
-            }
+            LoadBeginnerForm();
             var map = ReadMap();
             this.Width = map.GetLength(0) * Point.CellSize + 16;
             this.Height = map.GetLength(1) * Point.CellSize + 60;
@@ -39,6 +34,17 @@ namespace Pacman
             var game = controller.CreateGame(map, config);
             controller.OnGameOver(GameOverHandler);
             controller.StartGame();
+        }
+
+        private void LoadBeginnerForm()
+        {
+            BegginerForm fbegin = new BegginerForm();
+            if (fbegin.ShowDialog() == DialogResult.OK)
+            {
+                config.Ghosts = fbegin.Ghosts;
+                config.Apples = fbegin.Apples;
+                config.Speed = fbegin.Speed;
+            }
         }
 
         public void Update(IEnumerable<Item> map, Player player)
@@ -122,7 +128,33 @@ namespace Pacman
 
         private void GameOverHandler(object sender, EventArgs e)
         {
-            // show message mox with yes-no buttons "Game Over. Do you want to continue?"
+            if (sender != null)
+            {
+                var game = (Game)sender;
+                string message = "Score:" + game.Player.Score +
+                    " Do you want to continue?";
+                string caption = "Game over";
+                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+                DialogResult result;
+                result = MessageBox.Show(message, caption, buttons);
+
+                if (result == DialogResult.Yes)
+                {
+                    RestartGame();
+                }
+                else {
+                    this.BeginInvoke(new Action(() => this.Close()));
+                }
+            }
+        }
+        private void RestartGame()
+        {
+            canvas.Clear(Color.White);
+            LoadBeginnerForm();
+            var map = ReadMap();
+            controller.CreateGame(map, config);
+            controller.StartGame();
+            controller.OnGameOver(GameOverHandler);
         }
     }
 }

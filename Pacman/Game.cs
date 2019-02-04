@@ -22,15 +22,18 @@ namespace Pacman
         public Player Player;
 
         public List<Bullet> Bullets { get; private set; }
+        public List<Empty> Empties { get; private set; }
         public List<Enemy> Enemies { get; private set; }
         public List<Bonus> Bonuses { get; private set; }
         public IEnumerable<Item> ItemsToDisplay
         {
             get
             {
-                var items = new List<Item>(Barriers.Count + DammageableBarriers.Count + Bonuses.Count + Enemies.Count + Bullets.Count + 1);
+                var items = new List<Item>(Barriers.Count + Empties.Count + DammageableBarriers.Count 
+                                            + Bonuses.Count + Enemies.Count + Bullets.Count + 1);
                 items.AddRange(Barriers);
                 items.AddRange(DammageableBarriers);
+                items.AddRange(Empties);
                 items.AddRange(Bonuses);
                 items.AddRange(Bullets);
                 items.AddRange(Enemies);
@@ -44,6 +47,7 @@ namespace Pacman
         public Game(int[,] map, GameConfiguration configuration)
         {
             Configuration = configuration;
+            Empties = new List<Empty>();
             Bullets = new List<Bullet>();
             Enemies = new List<Enemy>();
             Bonuses = new List<Bonus>();
@@ -94,6 +98,10 @@ namespace Pacman
                     {
                         Bonuses.Add((Bonus)item);
                     }
+                    else if(item.Type == ItemType.Empty)
+                    {
+                        Empties.Add((Empty)item);
+                    }
                 }
             }
             GenerateEnemies();
@@ -136,10 +144,17 @@ namespace Pacman
             }
         }
 
+        private void GenerateEmpties(Point position)
+        {
+            var item = new Empty(new Point(position));
+            Empties.Add(item);
+        }
+
         public void Process()
         {
             while (IsActive)
             {
+                Empties.RemoveAll(e => !e.IsDirty);
                 ProcessBullets();
                 ProcessEnemies();
                 ProcessBonuses();
@@ -217,6 +232,7 @@ namespace Pacman
                             }
                             else if (items.Any(i => i.Type == ItemType.DammageableWall))
                             {
+                                Player.Score += 5;
                                 var item = (DammageableBarrier)items.FirstOrDefault(i => i.Type == ItemType.DammageableWall);
                                 item.Dammaged = true;
                             }
@@ -247,7 +263,9 @@ namespace Pacman
             {
                 for (int i = 0; i < enemies.Length; i++)
                 {
-                    Enemies.Remove((Enemy)enemies[i]);
+                    var item = enemies[i];
+                    GenerateEmpties(item.Position);
+                    Enemies.Remove((Enemy)item);
                 }
             }
         }
@@ -258,7 +276,9 @@ namespace Pacman
             {
                 for (int i = 0; i < bullets.Length; i++)
                 {
-                    Bullets.Remove((Bullet)bullets[i]);
+                    var item = bullets[i];
+                    GenerateEmpties(item.Position);
+                    Bullets.Remove((Bullet)item);
                 }
             }
         }
@@ -269,7 +289,9 @@ namespace Pacman
             {
                 for (int i = 0; i < bonuses.Length; i++)
                 {
-                    Bonuses.Remove((Bonus)bonuses[i]);
+                    var item = bonuses[i];
+                    GenerateEmpties(item.Position);
+                    Bonuses.Remove((Bonus)item);
                 }
             }
         }
@@ -295,7 +317,10 @@ namespace Pacman
                 NextDirection = direction
             };
             bullet.Position = DefinePosition(bullet, direction);
-            Bullets.Add(bullet);
+            if (TestStep(bullet))
+            {
+                Bullets.Add(bullet);
+            }
         }
 
         private Item DefineItem(int numberOfItem, int x, int y)
@@ -350,11 +375,6 @@ namespace Pacman
 
         private bool CheckCell(ItemType itemType, Point currentPoint)
         {
-            if (itemType == ItemType.Bullet)
-            {
-                var result = Barriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
-                return result == null;
-            }
             var result1 = Barriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
             var result2 = DammageableBarriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
             return result1 == null && result2 == null;
