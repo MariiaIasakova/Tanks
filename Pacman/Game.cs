@@ -15,7 +15,7 @@ namespace Pacman
         Random random = new Random();
         public List<Barrier> Barriers { get; private set; }
         public List<DammageableBarrier> DammageableBarriers { get; private set; }
-        private bool IsActive;
+        public bool IsActive { get; set;}
 
         public event EventHandler GameOver;
 
@@ -57,8 +57,6 @@ namespace Pacman
         public void Start()
         {
             IsActive = true;
-            var thread = new Thread(Process);
-            thread.Start();
         }
 
         public void Stop()
@@ -152,16 +150,12 @@ namespace Pacman
 
         public void Process()
         {
-            while (IsActive)
-            {
                 Empties.RemoveAll(e => !e.IsDirty);
                 ProcessBullets();
                 ProcessEnemies();
                 ProcessBonuses();
                 ProcessPlayer();
                 ProcessInteractions();
-                Thread.Sleep(1000 / 30);
-            }
         }
 
         public void SetDirectionToPlayer(Direction direction)
@@ -349,6 +343,9 @@ namespace Pacman
                     break;
                 case 6:
                     item = new Bonus(x, y);
+                    break;
+                case 7:
+                    item = new Water(x, y);
                     break;
                 default:
                     throw new ArgumentException("unknown number of item");

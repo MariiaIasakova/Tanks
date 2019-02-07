@@ -71,6 +71,7 @@
     <Compile Include="Objects\Items\MoveItems\Enemy.cs" />
     <Compile Include="Objects\Items\MoveItems\Player.cs" />
     <Compile Include="Objects\Items\MovingItem.cs" />
+    <Compile Include="Objects\Items\Water.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

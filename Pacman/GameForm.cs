@@ -142,11 +142,13 @@ namespace Pacman
                 {
                     RestartGame();
                 }
-                else {
+                else if (result == DialogResult.No)
+                {
                     this.BeginInvoke(new Action(() => this.Close()));
                 }
             }
         }
+
         private void RestartGame()
         {
             canvas.Clear(Color.White);

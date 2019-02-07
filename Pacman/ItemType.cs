@@ -15,6 +15,7 @@ namespace Pacman
         Enemy,
         Bullet,
         Player,
-        EnemySpawn
+        EnemySpawn,
+        Water
     }
 }

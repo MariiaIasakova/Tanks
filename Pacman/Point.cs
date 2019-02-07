@@ -8,7 +8,7 @@ namespace Pacman
 {
     public class Point : IEquatable<Point>
     {
-        public const int CellSize = 19;
+        public const int CellSize = 20;
         private int x;
         private int y;
         private int absX;
@@ -90,11 +90,11 @@ namespace Pacman
 
         public bool Equals(Point other)
         {
-            bool result = AbsX + CellSize <= other.AbsX
-                          || AbsX > other.AbsX + CellSize
-                          || AbsY + CellSize <= other.AbsY
-                          || AbsY > other.AbsY + CellSize;
-            return !result;
+            bool result = AbsX < other.AbsX + CellSize
+                          && AbsX + CellSize > other.AbsX
+                          && AbsY < other.AbsY + CellSize
+                          && AbsY + CellSize > other.AbsY;
+            return result;
         }
 
         public override bool Equals(object other)

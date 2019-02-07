@@ -35,14 +35,18 @@ namespace Pacman
 
         public void StopGame()
         {
-            game.Stop();
             timer.Stop();
+            game.Stop();
         }
 
 
         private void UpdateGame(object sender, EventArgs e)
         {
-            gameView.Update(game.ItemsToDisplay, game.Player);
+            if (game.IsActive)
+            {
+                game.Process();
+                gameView.Update(game.ItemsToDisplay, game.Player);
+            }
         }
 
         public void MovePlayer(Direction direction)
@@ -59,6 +63,5 @@ namespace Pacman
         {
             game.GameOver += handler;
         }
-
     }
 }
