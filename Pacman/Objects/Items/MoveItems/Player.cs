@@ -10,7 +10,7 @@ namespace Pacman.Objects.Items.MoveItems
     {
         private Game game;
 
-        public Player(int x, int y, int speed, Game game) : base (x, y, speed)
+        public Player(int x, int y, Game game) : base (x, y, (int)game.Configuration.Speed)
         {
             Picture = Properties.Resources.tank_hero;
             Type = ItemType.Player;
@@ -21,7 +21,7 @@ namespace Pacman.Objects.Items.MoveItems
         
         public void Attack()
         {
-            game.CreateBullet(Position, CurrentDirection);
+            game.CreateBullet(Position, CurrentDirection , this.Type);
         }
     }
 }

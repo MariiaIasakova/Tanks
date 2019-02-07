@@ -15,7 +15,8 @@ namespace Pacman
         Random random = new Random();
         public List<Barrier> Barriers { get; private set; }
         public List<DammageableBarrier> DammageableBarriers { get; private set; }
-        public bool IsActive { get; set;}
+        public List<Water> Waters { get; set; }
+        public bool IsActive { get; set; }
 
         public event EventHandler GameOver;
 
@@ -29,14 +30,15 @@ namespace Pacman
         {
             get
             {
-                var items = new List<Item>(Barriers.Count + Empties.Count + DammageableBarriers.Count 
-                                            + Bonuses.Count + Enemies.Count + Bullets.Count + 1);
+                var items = new List<Item>(Barriers.Count + Empties.Count + DammageableBarriers.Count
+                                            + Waters.Count + Bonuses.Count + Enemies.Count + Bullets.Count + 1);
+                items.AddRange(Empties);
                 items.AddRange(Barriers);
                 items.AddRange(DammageableBarriers);
-                items.AddRange(Empties);
+                items.AddRange(Waters);
                 items.AddRange(Bonuses);
-                items.AddRange(Bullets);
                 items.AddRange(Enemies);
+                items.AddRange(Bullets);
                 items.Add(Player);
                 return items;
             }
@@ -51,6 +53,7 @@ namespace Pacman
             Bullets = new List<Bullet>();
             Enemies = new List<Enemy>();
             Bonuses = new List<Bonus>();
+            Waters = new List<Water>();
             Initialize(map);
         }
 
@@ -78,7 +81,7 @@ namespace Pacman
                     var item = DefineItem(matrix[i, j], i, j);
                     if (item.Type == ItemType.Wall)
                     {
-                        Barriers.Add((Barrier) item);
+                        Barriers.Add((Barrier)item);
                     }
                     else if (item.Type == ItemType.DammageableWall)
                     {
@@ -96,9 +99,13 @@ namespace Pacman
                     {
                         Bonuses.Add((Bonus)item);
                     }
-                    else if(item.Type == ItemType.Empty)
+                    else if (item.Type == ItemType.Empty)
                     {
                         Empties.Add((Empty)item);
+                    }
+                    else if (item.Type == ItemType.Water)
+                    {
+                        Waters.Add((Water)item);
                     }
                 }
             }
@@ -150,12 +157,12 @@ namespace Pacman
 
         public void Process()
         {
-                Empties.RemoveAll(e => !e.IsDirty);
-                ProcessBullets();
-                ProcessEnemies();
-                ProcessBonuses();
-                ProcessPlayer();
-                ProcessInteractions();
+            Empties.RemoveAll(e => !e.IsDirty);
+            ProcessBullets();
+            ProcessEnemies();
+            ProcessBonuses();
+            ProcessPlayer();
+            ProcessInteractions();
         }
 
         public void SetDirectionToPlayer(Direction direction)
@@ -174,10 +181,15 @@ namespace Pacman
 
         private void ProcessBullets()
         {
+            var bullets = new List<Bullet>();
             foreach (var item in Bullets)
             {
-                Move(item);
+                if (!Move(item))
+                {
+                    bullets.Add(item);
+                }
             }
+            KillBullet(bullets.ToArray());
         }
 
         private void ProcessBonuses()
@@ -187,7 +199,7 @@ namespace Pacman
                 GenerateBonuses();
             }
         }
-
+#warning TODO сделать, чтобы танки стреляли
         private void ProcessEnemies()
         {
             for (int i = 0; i < Enemies.Count; i++)
@@ -197,6 +209,14 @@ namespace Pacman
                 {
                     enemy.CurrentDirection = ChangeDirection(enemy.CurrentDirection);
                 }
+                for (int j = 1; j < Configuration.Width / 2; j++)
+                {
+                    var position = DefinePosition(enemy, enemy.CurrentDirection, j);
+                    if (CheckOnPlayer(position))
+                    {
+                        CreateBullet(enemy.Position, enemy.CurrentDirection, ItemType.Enemy);
+                    }
+                }
             }
             if (Enemies.Count < Configuration.Ghosts)
             {
@@ -204,51 +224,95 @@ namespace Pacman
             }
         }
 
+        private bool CheckOnPlayer(Point position) => Player.Position == position ? true : false;
+
         private void ProcessInteractions()
         {
             var groupedItems = ItemsToDisplay.GroupBy(i => i.Position);
-                foreach (var items in groupedItems)
+            foreach (var items in groupedItems)
+            {
+                if (items.Count() > 1)
                 {
-                    if (items.Count() > 1)
+                    if (items.Any(i => i.Type == ItemType.Bullet))
                     {
-                        if (items.Any(i => i.Type == ItemType.Bullet))
+                        var bullets = new List<Item>();
+                        if (items.Any(i => i.Type == ItemType.Player))
                         {
-                            if (items.Any(i => i.Type == ItemType.Player))
+                            var bulletArray = items.Where(i => i.Type == ItemType.Bullet).ToArray();
+                            foreach (var item in bulletArray)
                             {
-                                IsActive = false;
-                                GameOver?.Invoke(this, null);
+                                var bullet = (Bullet)item;
+                                if (bullet.Holder == ItemType.Enemy)
+                                {
+                                    bullets.Add(item);
+                                    IsActive = false;
+                                    GameOver?.Invoke(this, null);
+                                }
                             }
-                            else if (items.Any(i => i.Type == ItemType.Enemy))
-                            {
-                                Player.Score += 20;
-                                var enemies = items.Where(i => i.Type == ItemType.Enemy).ToArray();
-                                KillEnemy(enemies);
-                            }
-                            else if (items.Any(i => i.Type == ItemType.DammageableWall))
-                            {
-                                Player.Score += 5;
-                                var item = (DammageableBarrier)items.FirstOrDefault(i => i.Type == ItemType.DammageableWall);
-                                item.Dammaged = true;
-                            }
-                            var bullets = items.Where(i => i.Type == ItemType.Bullet).ToArray();
-                            KillBullet(bullets);
                         }
-                        else if(items.Any(i => i.Type == ItemType.Player))
+                        else if (items.Any(i => i.Type == ItemType.Enemy))
+                        { 
+                            var bulletArray = items.Where(i => i.Type == ItemType.Bullet).ToArray();
+                            foreach (var item in bulletArray)
+                            {
+                                var bullet = (Bullet)item;
+                                if (bullet.Holder == ItemType.Player)
+                                {
+                                    Player.Score += 20;
+                                    bullets.Add(item);
+                                    var enemies = items.Where(i => i.Type == ItemType.Enemy).ToArray();
+                                    KillEnemy(enemies);
+                                }
+                            }
+                        }
+                        else if (items.Any(i => i.Type == ItemType.DammageableWall))
                         {
-                            if (items.Any(i => i.Type == ItemType.Enemy))
+                            var bulletArray = items.Where(i => i.Type == ItemType.Bullet).ToArray();
+                            foreach (var item in bulletArray)
                             {
-                                IsActive = false;
-                                GameOver?.Invoke(this, null);
+                                var bullet = (Bullet)item;
+                                if (bullet.Holder == ItemType.Player)
+                                {
+                                    Player.Score += 5;
+                                    bullets.Add(item);
+                                    var itemWall = (DammageableBarrier)items.FirstOrDefault(i => i.Type == ItemType.DammageableWall);
+                                    itemWall.Dammaged = true;
+                                }
                             }
-                            else if (items.Any(i => i.Type == ItemType.Bonus))
+                        }
+                        else if (items.Any(i => i.Type == ItemType.Wall))
+                        {
+                            var itemWall = (Barrier)items.FirstOrDefault(i => i.Type == ItemType.Wall);
+                            itemWall.IsDirty = true;
+                            var bulletArray = items.Where(i => i.Type == ItemType.Bullet).ToArray();
+                            foreach (var item in bulletArray)
                             {
-                                Player.Score += 50;
-                                var bonuses = items.Where(i => i.Type == ItemType.Bonus).ToArray();
-                                DeleteBonus(bonuses);
+                                bullets.Add(item);
                             }
+                        }
+                        else if (items.Any(i => i.Type == ItemType.Water))
+                        {
+                            var itemWater = (Water)items.FirstOrDefault(i => i.Type == ItemType.Water);
+                            itemWater.IsDirty = true;
+                        }
+                        KillBullet(bullets.ToArray());
+                    }
+                    else if (items.Any(i => i.Type == ItemType.Player))
+                    {
+                        if (items.Any(i => i.Type == ItemType.Enemy))
+                        {
+                            IsActive = false;
+                            GameOver?.Invoke(this, null);
+                        }
+                        else if (items.Any(i => i.Type == ItemType.Bonus))
+                        {
+                            Player.Score += 50;
+                            var bonuses = items.Where(i => i.Type == ItemType.Bonus).ToArray();
+                            KillBonus(bonuses);
                         }
                     }
                 }
+            }
         }
 
         private void KillEnemy(Item[] enemies)
@@ -277,7 +341,7 @@ namespace Pacman
             }
         }
 
-        private void DeleteBonus(Item[] bonuses)
+        private void KillBonus(Item[] bonuses)
         {
             if (bonuses != null)
             {
@@ -303,15 +367,24 @@ namespace Pacman
         private bool IsFullyInCell(Point position) => position.AbsX % Point.CellSize == 0
                                                       && position.AbsY % Point.CellSize == 0;
 
-        public void CreateBullet(Point position, Direction direction)
+        public void CreateBullet(Point position, Direction direction, ItemType holder)
         {
-            var bullet = new Bullet(position.X, position.Y, (int)Speed.High * 2)
+            int speed;
+            if (holder == ItemType.Player)
+            {
+                speed= (int)Speed.High * 2;
+            }
+            else
+            {
+                speed = (int)Speed.High;
+            }
+            var bullet = new Bullet(position.X, position.Y, speed, holder)
             {
                 CurrentDirection = direction,
                 NextDirection = direction
             };
-            bullet.Position = DefinePosition(bullet, direction);
-            if (TestStep(bullet))
+            bullet.Position = DefinePosition(bullet, direction,1);
+            if (CheckCell(bullet.Type, bullet.Position))
             {
                 Bullets.Add(bullet);
             }
@@ -332,7 +405,7 @@ namespace Pacman
                     item = new DammageableBarrier(x, y);
                     break;
                 case 3:
-                    Player = new Player(x, y, ((int)Configuration.Speed), this);
+                    Player = new Player(x, y, this);
                     item = Player;
                     break;
                 case 4:
@@ -365,34 +438,39 @@ namespace Pacman
 
         private bool TestStep(MovingItem item)
         {
-            var currentPoint = DefinePosition(item, item.CurrentDirection);
+            var currentPoint = DefinePosition(item, item.CurrentDirection,1);
             var result = CheckCell(item.Type, currentPoint);
             return result;
         }
 
         private bool CheckCell(ItemType itemType, Point currentPoint)
         {
-            var result1 = Barriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
-            var result2 = DammageableBarriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
-            return result1 == null && result2 == null;
+            var result = Barriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
+            if (itemType != ItemType.Bullet)
+            {
+                var result2 = DammageableBarriers.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
+                var result3 = Waters.FirstOrDefault(i => (i.Position.X == currentPoint.X && i.Position.Y == currentPoint.Y));
+                return result == null && result2 == null && result3 == null;
+            }
+            return result == null;
         }
 
-        private Point DefinePosition(MovingItem item, Direction direction)
+        private Point DefinePosition(MovingItem item, Direction direction, int count)
         {
             Point currentPoint;
             switch (direction)
             {
                 case Direction.Up:
-                    currentPoint = Point.FromRelative(item.Position.X, item.Position.Y - 1);
+                    currentPoint = Point.FromRelative(item.Position.X, item.Position.Y - count);
                     break;
                 case Direction.Down:
-                    currentPoint = Point.FromRelative(item.Position.X, item.Position.Y + 1);
+                    currentPoint = Point.FromRelative(item.Position.X, item.Position.Y + count);
                     break;
                 case Direction.Left:
-                    currentPoint = Point.FromRelative(item.Position.X - 1, item.Position.Y);
+                    currentPoint = Point.FromRelative(item.Position.X - count, item.Position.Y);
                     break;
                 case Direction.Right:
-                    currentPoint = Point.FromRelative(item.Position.X + 1, item.Position.Y);
+                    currentPoint = Point.FromRelative(item.Position.X + count, item.Position.Y);
                     break;
                 default:
                     throw new ArgumentException("unknown direction");

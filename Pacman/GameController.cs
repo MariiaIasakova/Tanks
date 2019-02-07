@@ -47,6 +47,10 @@ namespace Pacman
                 game.Process();
                 gameView.Update(game.ItemsToDisplay, game.Player);
             }
+            else
+            {
+                StopGame();
+            }
         }
 
         public void MovePlayer(Direction direction)

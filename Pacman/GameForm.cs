@@ -121,11 +121,6 @@ namespace Pacman
             return map;
         }
 
-        private void GameForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            controller.StopGame();
-        }
-
         private void GameOverHandler(object sender, EventArgs e)
         {
             if (sender != null)
@@ -142,7 +137,7 @@ namespace Pacman
                 {
                     RestartGame();
                 }
-                else if (result == DialogResult.No)
+                else
                 {
                     this.BeginInvoke(new Action(() => this.Close()));
                 }

@@ -116,7 +116,6 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "GameForm";
             this.Text = "Tanks";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameForm_FormClosing);
             this.Load += new System.EventHandler(this.GameForm_Load);
             this.ctlStatusStrip.ResumeLayout(false);
             this.ctlStatusStrip.PerformLayout();

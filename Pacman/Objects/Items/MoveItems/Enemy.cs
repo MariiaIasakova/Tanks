@@ -8,10 +8,11 @@ namespace Pacman.Objects.Items.MoveItems
 {
     public class Enemy : MovingItem
     {
-        public Enemy(int x, int y, int speed) : base(x, y, speed)
+        public Enemy(int x, int y, int speed) : base(x, y,speed)
         {
             Picture = Properties.Resources.tank_enemy;
             Type = ItemType.Enemy;
         }
+
     }
 }

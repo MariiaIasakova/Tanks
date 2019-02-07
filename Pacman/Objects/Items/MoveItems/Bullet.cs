@@ -8,10 +8,13 @@ namespace Pacman.Objects.Items.MoveItems
 {
     public class Bullet : MovingItem
     {
-        public Bullet(int x, int y, int speed) : base(x, y, speed)
+        public ItemType Holder { get; set; }
+
+        public Bullet(int x, int y, int speed, ItemType holder) : base(x, y, speed)
         {
             Picture = Properties.Resources.bullet;
             Type = ItemType.Bullet;
+            Holder = holder;
         }
     }
 }
