@@ -248,7 +248,6 @@ namespace Pacman
                                     bullets.Add(item);
                                     IsActive = false;
                                      GameOver?.Invoke(this, null);
-                                    break;
                                 }
                             }
                         }
@@ -305,7 +304,6 @@ namespace Pacman
                         {
                             IsActive = false;
                             GameOver?.Invoke(this, null);
-                            break;
                         }
                         else if (items.Any(i => i.Type == ItemType.Bonus))
                         {
