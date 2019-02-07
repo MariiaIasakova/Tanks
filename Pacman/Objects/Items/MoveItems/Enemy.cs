@@ -13,6 +13,5 @@ namespace Pacman.Objects.Items.MoveItems
             Picture = Properties.Resources.tank_enemy;
             Type = ItemType.Enemy;
         }
-
     }
 }

@@ -215,6 +215,7 @@ namespace Pacman
                     if (CheckOnPlayer(position))
                     {
                         CreateBullet(enemy.Position, enemy.CurrentDirection, ItemType.Enemy);
+                        break;
                     }
                 }
             }
@@ -246,7 +247,8 @@ namespace Pacman
                                 {
                                     bullets.Add(item);
                                     IsActive = false;
-                                    GameOver?.Invoke(this, null);
+                                     GameOver?.Invoke(this, null);
+                                    break;
                                 }
                             }
                         }
@@ -303,6 +305,7 @@ namespace Pacman
                         {
                             IsActive = false;
                             GameOver?.Invoke(this, null);
+                            break;
                         }
                         else if (items.Any(i => i.Type == ItemType.Bonus))
                         {

@@ -139,7 +139,7 @@ namespace Pacman
                 }
                 else
                 {
-                    this.BeginInvoke(new Action(() => this.Close()));
+                    BeginInvoke(new Action(() => this.Close()));
                 }
             }
         }
@@ -151,7 +151,6 @@ namespace Pacman
             var map = ReadMap();
             controller.CreateGame(map, config);
             controller.StartGame();
-            controller.OnGameOver(GameOverHandler);
         }
     }
 }
